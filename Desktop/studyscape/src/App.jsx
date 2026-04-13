@@ -16,7 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import UsernamePage from "./pages/UsernamePage";
 
-function Navbar({ darkMode, setDarkMode, user, username, onLogout }) {
+function Navbar({ darkMode, user, username, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -31,7 +31,6 @@ function Navbar({ darkMode, setDarkMode, user, username, onLogout }) {
     text: darkMode ? "#D4B896" : "#3D2B1F",
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -89,8 +88,6 @@ function Navbar({ darkMode, setDarkMode, user, username, onLogout }) {
             {navBtn("Timer", "/timer")}
             {navBtn("Stats", "/stats")}
             {navBtn("City", "/city")}
-
-            {/* Username dropdown */}
             <div className="relative ml-2" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -99,11 +96,10 @@ function Navbar({ darkMode, setDarkMode, user, username, onLogout }) {
                   border: `1px solid ${theme.border}`,
                   background: theme.card,
                 }}
-                className="px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
+                className="px-4 py-2 rounded-full text-sm font-medium"
               >
                 @{username}
               </button>
-
               {dropdownOpen && (
                 <div
                   style={{
@@ -163,7 +159,6 @@ function Navbar({ darkMode, setDarkMode, user, username, onLogout }) {
   );
 }
 
-// Dark mode toggle fixed to bottom right
 function DarkModeToggle({ darkMode, setDarkMode }) {
   const theme = {
     bg: darkMode ? "#2E2620" : "white",
@@ -191,6 +186,9 @@ function AppContent() {
   const [hasUsername, setHasUsername] = useState(false);
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
+  const [timerSeconds, setTimerSeconds] = useState(25 * 60);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [sessionSeconds, setSessionSeconds] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -216,6 +214,9 @@ function AppContent() {
     await logOut();
     setHasUsername(false);
     setUsername("");
+    setTimerRunning(false);
+    setTimerSeconds(25 * 60);
+    setSessionSeconds(0);
     navigate("/login");
   };
 
@@ -246,6 +247,15 @@ function AppContent() {
       </div>
     );
 
+  const timerProps = {
+    timerSeconds,
+    setTimerSeconds,
+    timerRunning,
+    setTimerRunning,
+    sessionSeconds,
+    setSessionSeconds,
+  };
+
   return (
     <div
       style={{ background: bg }}
@@ -253,15 +263,24 @@ function AppContent() {
     >
       <Navbar
         darkMode={darkMode}
-        setDarkMode={setDarkMode}
         user={user}
         username={username}
         onLogout={handleLogout}
       />
       <div className="flex flex-col flex-1">
         <Routes>
-          <Route path="/" element={<TimerPage darkMode={darkMode} />} />
-          <Route path="/timer" element={<TimerPage darkMode={darkMode} />} />
+          <Route
+            path="/"
+            element={
+              <TimerPage darkMode={darkMode} user={user} {...timerProps} />
+            }
+          />
+          <Route
+            path="/timer"
+            element={
+              <TimerPage darkMode={darkMode} user={user} {...timerProps} />
+            }
+          />
           <Route path="/stats" element={<StatsPage darkMode={darkMode} />} />
           <Route path="/city" element={<CityPage darkMode={darkMode} />} />
           <Route

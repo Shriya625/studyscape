@@ -3,6 +3,8 @@ import {
   doc,
   setDoc,
   getDoc,
+  updateDoc,
+  increment,
   collection,
   query,
   where,
@@ -24,7 +26,6 @@ export const isUsernameTaken = async (username) => {
 
 // Save new user to Firestore
 export const createUserProfile = async (uid, username, email) => {
-  // Save to users collection
   await setDoc(doc(db, "users", uid), {
     username: username.toLowerCase(),
     email,
@@ -34,7 +35,6 @@ export const createUserProfile = async (uid, username, email) => {
     buildingLevel: 1,
     createdAt: new Date(),
   });
-  // Save username to usernames collection (for uniqueness check)
   await setDoc(doc(db, "usernames", username.toLowerCase()), {
     username: username.toLowerCase(),
     uid,
@@ -45,4 +45,12 @@ export const createUserProfile = async (uid, username, email) => {
 export const getUserProfile = async (uid) => {
   const snap = await getDoc(doc(db, "users", uid));
   return snap.exists() ? snap.data() : null;
+};
+
+// Add XP after a study session
+export const addXP = async (uid, secondsStudied, xpEarned) => {
+  await updateDoc(doc(db, "users", uid), {
+    xp: increment(xpEarned),
+    totalStudyTime: increment(secondsStudied),
+  });
 };

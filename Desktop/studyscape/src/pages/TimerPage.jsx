@@ -1,6 +1,15 @@
 import Timer from "../components/Timer/Timer";
 
-function TimerPage({ darkMode }) {
+function TimerPage({
+  darkMode,
+  user,
+  timerSeconds,
+  setTimerSeconds,
+  timerRunning,
+  setTimerRunning,
+  sessionSeconds,
+  setSessionSeconds,
+}) {
   const theme = {
     text: darkMode ? "#A89880" : "#9C8878",
   };
@@ -13,7 +22,16 @@ function TimerPage({ darkMode }) {
       >
         Focus Session
       </p>
-      <Timer darkMode={darkMode} />
+      <Timer
+        darkMode={darkMode}
+        user={user}
+        timerSeconds={timerSeconds}
+        setTimerSeconds={setTimerSeconds}
+        timerRunning={timerRunning}
+        setTimerRunning={setTimerRunning}
+        sessionSeconds={sessionSeconds}
+        setSessionSeconds={setSessionSeconds}
+      />
     </div>
   );
 }
