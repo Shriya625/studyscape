@@ -189,7 +189,34 @@ function AppContent() {
   const [timerSeconds, setTimerSeconds] = useState(25 * 60);
   const [timerRunning, setTimerRunning] = useState(false);
   const [sessionSeconds, setSessionSeconds] = useState(0);
+  const timerEndRef = useRef(null);
+  const sessionStartRef = useRef(null);
   const navigate = useNavigate();
+
+  // This runs in App.jsx so it NEVER stops even when pages change
+  useEffect(() => {
+    if (!timerRunning) return;
+
+    timerEndRef.current = Date.now() + timerSeconds * 1000;
+    sessionStartRef.current = Date.now() - sessionSeconds * 1000;
+
+    const interval = setInterval(() => {
+      if (!timerEndRef.current || !sessionStartRef.current) return;
+      const remaining = Math.round((timerEndRef.current - Date.now()) / 1000);
+      const elapsed = Math.round((Date.now() - sessionStartRef.current) / 1000);
+      if (remaining <= 0) {
+        setTimerSeconds(0);
+        setSessionSeconds(elapsed);
+        setTimerRunning(false);
+        clearInterval(interval);
+        return;
+      }
+      setTimerSeconds(remaining);
+      setSessionSeconds(elapsed);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerRunning]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -281,7 +308,10 @@ function AppContent() {
               <TimerPage darkMode={darkMode} user={user} {...timerProps} />
             }
           />
-          <Route path="/stats" element={<StatsPage darkMode={darkMode} />} />
+          <Route
+            path="/stats"
+            element={<StatsPage darkMode={darkMode} user={user} />}
+          />
           <Route path="/city" element={<CityPage darkMode={darkMode} />} />
           <Route
             path="/login"
